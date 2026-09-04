@@ -1,0 +1,244 @@
+@import "tailwindcss";
+
+@theme {
+  /*
+   * Exotica shoot every car in one achromatic showroom: a mid-grey wall
+   * panel, a white faceted wall, a dark polished floor and a near-black
+   * panel standing behind every car. Every value below is measured off
+   * their own frames — nothing invented. The page ground is the wall
+   * panel itself: a genuine mid-value grey (L* ~77), not a paper, stone,
+   * ivory or concrete field like every other light page in this series.
+   */
+  --color-ground: #bdbdbd;    /* their left wall panel — the page ground */
+  --color-plate: #dfdfdf;     /* the white faceted wall — raised cards, light bands */
+  --color-ink: #242424;       /* the dark panel behind every car — primary text, 8.26:1 on ground */
+  --color-ink-soft: #4b4b4b;  /* secondary text, 4.64:1 on ground, 6.55:1 on plate */
+  --color-floor: #292929;     /* the near floor — inverted bands, the 3D room's ground */
+  --color-rule: #474747;      /* the mid floor — hairlines and rules ONLY, never text */
+
+  /* Seven measured cabin hides. A colour may fill a swatch, a bar or a
+     voxel — it may never be text, a border or a control. */
+  --hide-yukon: #d2baa0;
+  --hide-320i: #bf7d67;
+  --hide-x7: #b66643;
+  --hide-x1: #c54638;
+  --hide-gle: #d8b9a5;
+  --hide-rangerover: #afaa96;
+  --hide-glc43: #e24441;
+
+  --font-display: var(--font-martian-mono), ui-monospace, "SF Mono", monospace;
+  --font-body: var(--font-wix-madefor), system-ui, sans-serif;
+  --font-arabic-display: var(--font-cascadia-mono), "Courier New", monospace;
+  --font-arabic-body: var(--font-parastoo), system-ui, sans-serif;
+
+  --text-hero: clamp(2.2rem, 5vw, 4.2rem);
+  --text-display: clamp(1.5rem, 3vw, 2.4rem);
+  --text-lead: clamp(1rem, 1.15vw, 1.14rem);
+}
+
+@layer base {
+  section[id] { scroll-margin-top: 5.5rem; }
+
+  /* A WebGL canvas is a replaced element: its intrinsic drawing-buffer width
+     becomes its grid/flex item's automatic minimum, which forces the track
+     past a phone's viewport with no `minmax` available to write on an
+     implicit single column. Every grid/flex item hosting a canvas needs
+     min-w-0 in the markup as well as this. `overflow-x: hidden` on body
+     alone does not clip anything either -- with html visible, body's
+     overflow propagates to the viewport and computes back to visible.
+     `clip` on both contains it without creating a scroll container, so
+     `position: sticky` still resolves against the viewport. */
+  html {
+    background: var(--color-ground);
+    color: var(--color-ink);
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: auto;
+    overflow-x: clip;
+  }
+
+  body { font-family: var(--font-body); overflow-x: clip; }
+  html[dir="rtl"] body { font-family: var(--font-arabic-body); }
+
+  ::selection { background: var(--color-ink); color: var(--color-plate); }
+  :focus-visible { outline: 2px solid var(--color-ink); outline-offset: 3px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@utility font-display { font-family: var(--font-display); }
+html[dir="rtl"] .font-display { font-family: var(--font-arabic-display); }
+
+/* Their protocol is fixed-pitch; headings follow it in caps at a measured
+   tracking. Distinct from every extralight/wide-tracked geometric display
+   already in the set (01's Jost): this is a monospace grid, not a
+   luxury lockup. */
+@utility sign {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+  line-height: 1;
+}
+html[dir="rtl"] .sign {
+  font-family: var(--font-arabic-display);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  line-height: 1.5;
+}
+
+/* A Latin wordmark and any marque/model heading stay in the Latin display
+   face in both locales -- the Arabic display face ships Latin glyphs of its
+   own and would render the brand, or a BMW model code, in the wrong voice. */
+@utility signmark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: uppercase;
+  unicode-bidi: plaintext;
+}
+
+@utility label {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.66rem;
+  font-weight: 600;
+  color: var(--color-ink-soft);
+}
+html[dir="rtl"] .label {
+  font-family: var(--font-arabic-body);
+  font-weight: 700;
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.86rem;
+}
+
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+@utility arabic { font-family: var(--font-arabic-body); }
+
+/* ---------------------------------------------------------------------------
+ * Motion signature: THE ADVANCE.
+ *
+ * Their carousel cuts hard between position 5 and position 6 -- there is no
+ * dissolve, no in-between frame. So nothing on this page interpolates: a
+ * block's children arrive one at a time on a fixed 60ms grid, each going
+ * from fully absent to fully present in a single animation frame via
+ * `steps(1, end)`. No easing, no travel, no fade-in, no blur. The stagger is
+ * a flat per-child index, never distance or randomised.
+ *
+ * `[data-advance]` is the OUTER element an IntersectionObserver watches;
+ * `[data-advance-item]` children get `--advance-i` written inline by the
+ * component and carry the actual animation, so a transform on the observed
+ * element never moves its own intersection rectangle mid-reveal.
+ * ------------------------------------------------------------------------ */
+
+@keyframes advance-in {
+  to { opacity: 1; }
+}
+
+[data-advance-item] {
+  opacity: 0;
+  animation: advance-in 1ms steps(1, end) calc(var(--advance-i, 0) * 60ms) forwards paused;
+}
+[data-advance][data-seen] [data-advance-item] {
+  animation-play-state: running;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-advance-item] { opacity: 1; animation: none; }
+}
+
+/* Nothing on this page cross-fades: an image, a position or a locale change
+   is a hard cut, matching the account's own carousel. */
+.hard-cut { transition: none !important; }
+
+/* ---------------------------------------------------------------------------
+ * Arabic corrections. Keyed off [dir], never [lang] -- browser translation
+ * rewrites lang. Unlayered so they outrank Tailwind utilities.
+ * ------------------------------------------------------------------------ */
+
+html[dir="ltr"] .text-hero { line-height: 0.98; }
+html[dir="rtl"] .text-hero {
+  font-size: clamp(1.9rem, 3.6vw, 3rem);
+  line-height: 1.5;
+  font-weight: 700;
+}
+html[dir="ltr"] .text-display { line-height: 1.05; }
+html[dir="rtl"] .text-display {
+  font-size: clamp(1.5rem, 2.6vw, 2.1rem);
+  line-height: 1.5;
+  font-weight: 700;
+}
+
+html[dir="rtl"] [class*="tracking-["],
+html[dir="rtl"] .tracking-widest,
+html[dir="rtl"] .tracking-wider { letter-spacing: 0; }
+
+.fine { font-size: 0.79rem; line-height: 1.65; }
+html[dir="rtl"] .fine { font-size: 0.92rem; line-height: 1.95; }
+
+html[dir="rtl"] .text-lead { font-size: clamp(1.05rem, 1.2vw, 1.2rem); line-height: 2; }
+
+/* Arabic sets far more meaning per character than Latin, so a measure
+   written in `ch` for an English headline strands the Arabic one over five
+   or six lines. Measures are named and given their own value per direction. */
+.m-hero { max-width: 15ch; }
+html[dir="rtl"] .m-hero { max-width: 22ch; }
+.m-head { max-width: 24ch; }
+html[dir="rtl"] .m-head { max-width: 32ch; }
+
+/* Numbers/marques that stay Latin in both locales. */
+.chip {
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.66rem;
+  font-weight: 600;
+  unicode-bidi: plaintext;
+}
+
+/* A chip carrying something quoted verbatim keeps the case it was published
+   in -- their own highlight reads "SOLD!", "⚡️EV⚡️" -- upper-casing would
+   edit the quotation. */
+.chip-verbatim { text-transform: none; letter-spacing: 0.02em; }
+
+/* A chip whose text is translated is not Latin signage: under RTL it takes
+   the Arabic body face and loses the tracking that breaks Arabic joins. */
+html[dir="rtl"] .chip-loc {
+  font-family: var(--font-arabic-body);
+  letter-spacing: 0;
+  font-size: 0.82rem;
+}
+
+/* three.js writes an inline pixel size onto the canvas from whatever its
+   container measured when the renderer last sized itself. A later layout
+   pass -- fonts arriving, an aspect-ratio box settling -- leaves that size
+   stale and the canvas overhangs its parent. Inline styles outrank the
+   sheet, so this has to be !important. */
+.solid-host canvas {
+  display: block;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+/* Direction resolved from the content, alignment taken from the page. */
+.bidi { unicode-bidi: plaintext; }
+html[dir="rtl"] .bidi { text-align: right; }
+html[dir="ltr"] .bidi { text-align: left; }
+
+.latin {
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+html[dir="rtl"] .latin { text-align: right; }
