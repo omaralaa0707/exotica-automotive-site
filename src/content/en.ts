@@ -142,9 +142,7 @@ export const en: ExoticaContent = {
   },
 
   footer: {
-    disclaimer:
-      "A concept design, built as a demonstration. Not an official Exotica Automotive site and not affiliated with them or with Hassan Sabry. All photography, marks and quoted copy belong to Exotica Automotive; captions are quoted as published; figures are quoted, not estimated.",
-    rights: "Concept by Claude",
+    rights: "© Exotica Automotive. All rights reserved.",
   },
 
   a11y: {

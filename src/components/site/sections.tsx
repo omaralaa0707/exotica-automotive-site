@@ -539,7 +539,6 @@ export function Footer() {
   return (
     <footer className="border-t border-rule/40 py-8">
       <div className="mx-auto flex max-w-6xl flex-col gap-3 px-5">
-        <p className="fine text-ink-soft">{c.footer.disclaimer}</p>
         <p className="fine text-ink-soft">{c.footer.rights}</p>
       </div>
     </footer>
